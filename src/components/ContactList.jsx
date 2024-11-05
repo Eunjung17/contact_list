@@ -1,5 +1,6 @@
 import React from "react"; 
 import { useState } from 'react'
+import {useEffect} from 'react'
 import ContactRow from './ContactRow.jsx'
 
 const dummyContacts = [
@@ -8,10 +9,33 @@ const dummyContacts = [
     { id: 3, name: "BB-8", phone: "888-888-8888", email: "bb8@droids.com" },
     ];
 
-export default function ContactList() { 
+export default function ContactList({ setSelectedContactId }) { 
 
 const [contacts, setContacts] = useState(dummyContacts);
 console.log("Contacts: ", contacts);
+
+//Remember to pass useEffect a callback function and an EMPTY dependency array. 
+//This will ensure our component will run the effect ONLY ONCE after the component has mounted.
+useEffect(() => {
+    
+    async function fetchContacts() {
+      try {
+        const response = await fetch(
+          "https://fsa-jsonplaceholder-69b5c48f1259.herokuapp.com/users"
+        );
+        const result = await response.json();
+        setContacts(result);
+        console.log("contacts: " , contacts);
+
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchContacts();
+
+  }, []);
+
 
   return ( 
         <table>
@@ -26,10 +50,9 @@ console.log("Contacts: ", contacts);
               <td>Email:</td>
               <td>Phone:</td>
             </tr>
-            {contacts.map(contact =>(
-                <ContactRow key = {contact.id} contact={contact}/>
-            ))
-            }
+            {contacts.map((contact) => {
+                return <ContactRow key={contact.id} contact={contact} setSelectedContactId={setSelectedContactId}/>;
+            })}
           </tbody>
         </table>
     ); 
